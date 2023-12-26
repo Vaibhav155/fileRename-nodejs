@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const sharp = require('sharp');
 const express = require('express');
 const app = express();
 
@@ -44,8 +45,20 @@ async function renameCopiedFiles(userId,timestamp,oldPath,thumbFolder){
             console.log('thumbnail added');
         }
     })
+    
 }
 
+async function resize(thumbFolder,resizedFiles,width, height){
+    sharp(thumbFolder)
+        .resize({width , height})
+        .toFile(resizedFiles, (err, info) => {
+            if (err){
+                console.error('Error',err);
+            }else{
+                console.log('Image resized',info);
+            }
+        });
+}
 
 userId = "2"
 timestamp = "5728"
@@ -53,6 +66,9 @@ const inputFolder = path.join(__dirname, 'source');
 const outputFolder = path.join(__dirname, 'destination');
 const thumbFolder = path.join(__dirname, 'thumbnail');
 const copyFolder = path.join(__dirname, 'copyfolder');
+const resizedFiles = path.join(__dirname, 'resizedFiles');
+const width = 300;
+const height = 300;
 copyFiles(inputFolder,copyFolder);
 //list of all the files
 const filesToRename = fs.readdirSync(inputFolder);
@@ -67,3 +83,4 @@ for (const file of srcFiles){
     const oldPath = path.join(copyFolder,file)
     renameCopiedFiles(userId,timestamp,oldPath,thumbFolder)
 }
+resize(thumbFolder,resizedFiles, width, height)
